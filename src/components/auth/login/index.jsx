@@ -57,15 +57,18 @@ const Login = () => {
     } catch (err) {
       console.error('Google login error:', err);
       const message = `${err?.message || ''}`.toLowerCase();
+      const unauthorizedDomain = err?.code === 'auth/unauthorized-domain';
       const domainError =
         message.includes(requiredDomain.toLowerCase()) ||
         message.includes('institutional email') ||
         message.includes('g.msuiit');
 
       setErrorMessage(
-        domainError
-          ? `Login failed. Must use institutional email: ${requiredDomain}`
-          : 'Something went wrong with Google Sign-In. Check pop-up settings.'
+        unauthorizedDomain
+          ? `Google Sign-In is blocked for ${window.location.origin}. Run the app on http://localhost:3000 or add this origin under Firebase Authentication > Settings > Authorized domains.`
+          : domainError
+            ? `Login failed. Must use institutional email: ${requiredDomain}`
+            : 'Something went wrong with Google Sign-In. Check pop-up settings.'
       );
       setIsSigningIn(false);
     }
