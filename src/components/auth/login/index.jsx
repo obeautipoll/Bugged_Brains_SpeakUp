@@ -56,8 +56,14 @@ const Login = () => {
       navigate(resolveRouteByRole(role));
     } catch (err) {
       console.error('Google login error:', err);
+      const message = `${err?.message || ''}`.toLowerCase();
+      const domainError =
+        message.includes(requiredDomain.toLowerCase()) ||
+        message.includes('institutional email') ||
+        message.includes('g.msuiit');
+
       setErrorMessage(
-        err.message?.includes('domain')
+        domainError
           ? `Login failed. Must use institutional email: ${requiredDomain}`
           : 'Something went wrong with Google Sign-In. Check pop-up settings.'
       );
