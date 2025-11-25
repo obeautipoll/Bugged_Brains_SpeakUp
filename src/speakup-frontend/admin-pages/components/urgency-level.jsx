@@ -128,7 +128,7 @@ const UrgentComplaintsWidget = () => {
     <div className="urgent-complaints-widget">
       {/* Header */}
       <div className="widget-header">
-        <h3 className="widget-title">🤖 Urgent Complaints Queue</h3>
+        <h3 className="widget-title">🤖 Urgent Comwadplaints Queue</h3>
         <span className="new-count-badge">{complaints.length} New</span>
       </div>
 
