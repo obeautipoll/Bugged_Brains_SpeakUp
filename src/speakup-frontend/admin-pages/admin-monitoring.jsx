@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import "../../styles/styles-admin/monitor-admin.css";
 import SideBar from "./components/AdminSideBar";
 import AdminNavbar from "./components/AdminNavBar";
 import { db } from "../../firebase/firebase";
@@ -23,8 +22,6 @@ const AdminMonitorComplaints = () => {
     search: "",
   });
 
-  
-
   // Form states
   const [feedback, setFeedback] = useState("");
   const [feedbackFiles, setFeedbackFiles] = useState([]);
@@ -43,7 +40,6 @@ const AdminMonitorComplaints = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const hasAppliedRouteSelection = useRef(false);
-  const VIEW_TABS = ["details", "feedback"];
   const MANAGE_TABS = ["details", "feedback", "notes", "assign", "status"];
   const TAB_LABELS = {
     details: "Details",
@@ -91,7 +87,6 @@ const AdminMonitorComplaints = () => {
         setComplaints(fetchedComplaints);
         setFilteredComplaints(fetchedComplaints);
 
-        // If navigated with complaintId, open the modal once and clear state
         try {
           const state = location?.state || {};
           if (!hasAppliedRouteSelection.current && state.complaintId && !selectedComplaint) {
@@ -171,8 +166,7 @@ const AdminMonitorComplaints = () => {
       filtered = filtered.filter(
         (c) =>
           (c.id && c.id.toLowerCase().includes(filters.search.toLowerCase())) ||
-          (c.category && c.category.toLowerCase().includes(filters.search.toLowerCase())) ||
-          (c.college && c.college.toLowerCase().includes(filters.search.toLowerCase()))
+          (c.category && c.category.toLowerCase().includes(filters.search.toLowerCase()))
       );
     }
 
@@ -180,13 +174,12 @@ const AdminMonitorComplaints = () => {
   }, [filters, complaints]);
 
   useEffect(() => {
-    const allowedTabs = modalMode === "view" ? VIEW_TABS : MANAGE_TABS;
+    const allowedTabs = MANAGE_TABS;
     if (!allowedTabs.includes(activeTab)) {
       setActiveTab(allowedTabs[0]);
     }
   }, [modalMode, activeTab]);
 
-  // 📄 Modal logic
   const openModal = (complaint, mode = "view", defaultTab = "details") => {
     setSelectedComplaint(complaint);
     setShowModal(true);
@@ -211,9 +204,6 @@ const AdminMonitorComplaints = () => {
     setModalMode("view");
   };
 
-  
-
-  // 💬 Feedback & Admin actions (same as before)
   const getAdminIdentifier = () => currentUser?.uid || currentUser?.email || "admin-user";
 
   const getAdminDisplayName = () =>
@@ -477,58 +467,57 @@ const AdminMonitorComplaints = () => {
     }
   };
 
-const handleUpdateStatus = async (nextStatusValue) => {
-  if (!selectedComplaint || !nextStatusValue) return;
+  const handleUpdateStatus = async (nextStatusValue) => {
+    if (!selectedComplaint || !nextStatusValue) return;
 
-  const normalizedNext = normalizeStatusValue(nextStatusValue);
-  const currentNormalized = normalizeStatusValue(selectedComplaint.status);
-  if (!normalizedNext || normalizedNext === currentNormalized) return;
+    const normalizedNext = normalizeStatusValue(nextStatusValue);
+    const currentNormalized = normalizeStatusValue(selectedComplaint.status);
+    if (!normalizedNext || normalizedNext === currentNormalized) return;
 
-  const displayStatus = formatStatusLabel(normalizedNext);
+    const displayStatus = formatStatusLabel(normalizedNext);
 
-  const confirmed = window.confirm(
-    `Are you sure you want to change the status to "${displayStatus}"?`
-  );
-  if (!confirmed) return;
-
-  try {
-    const complaintRef = doc(db, "complaints", selectedComplaint.id);
-    await updateDoc(complaintRef, {
-      status: displayStatus,
-      statusUpdatedAt: serverTimestamp(),
-    });
-
-    const updatedComplaints = complaints.map((complaint) =>
-      complaint.id === selectedComplaint.id
-        ? { ...complaint, status: displayStatus }
-        : complaint
+    const confirmed = window.confirm(
+      `Are you sure you want to change the status to "${displayStatus}"?`
     );
+    if (!confirmed) return;
 
-    setComplaints(updatedComplaints);
-    setSelectedComplaint({ ...selectedComplaint, status: displayStatus });
-    setNewStatus(normalizedNext);
+    try {
+      const complaintRef = doc(db, "complaints", selectedComplaint.id);
+      await updateDoc(complaintRef, {
+        status: displayStatus,
+        statusUpdatedAt: serverTimestamp(),
+      });
 
-  } catch (error) {
-    console.error("❌ Error updating complaint status:", error);
-  }
-};
+      const updatedComplaints = complaints.map((complaint) =>
+        complaint.id === selectedComplaint.id
+          ? { ...complaint, status: displayStatus }
+          : complaint
+      );
+
+      setComplaints(updatedComplaints);
+      setSelectedComplaint({ ...selectedComplaint, status: displayStatus });
+      setNewStatus(normalizedNext);
+
+    } catch (error) {
+      console.error("❌ Error updating complaint status:", error);
+    }
+  };
 
   const getStatusClass = (status) => {
     switch (normalizeStatusValue(status)) {
       case "pending":
-        return "status-pending";
+        return "bg-amber-50 text-amber-600";
       case "in-progress":
-        return "status-in-progress";
+        return "bg-blue-50 text-blue-600";
       case "resolved":
-        return "status-resolved";
+        return "bg-green-50 text-green-600";
       case "closed":
-        return "status-closed";
+        return "bg-gray-100 text-gray-600";
       default:
-        return "status-pending";
+        return "bg-amber-50 text-amber-600";
     }
   };
 
-  // 🧹 Utility helpers
   const formatDateTime = (date) => {
     if (!date) return "N/A";
     const d = date.toDate ? date.toDate() : new Date(date);
@@ -623,14 +612,16 @@ const handleUpdateStatus = async (nextStatusValue) => {
 
     return (
       <>
-        <div className="detail-section">
-          <h4>{`${getCategoryLabel(selectedComplaint.category)} Details`}</h4>
+        <div className="mb-8 bg-gray-50 p-5 rounded-lg">
+          <h4 className="text-[#800000] text-base font-semibold mb-4 pb-2 border-b-2 border-gray-200">
+            {`${getCategoryLabel(selectedComplaint.category)} Details`}
+          </h4>
           {categoryDetails.length > 0 ? (
-            <div className="detail-grid">
+            <div className="space-y-4">
               {categoryDetails.map((info) => (
-                <div className="detail-item" key={info.label}>
-                  <strong>{info.label}:</strong>
-                  <span>{info.value}</span>
+                <div className="grid grid-cols-[200px_1fr] gap-4 items-start" key={info.label}>
+                  <strong className="text-[#333] font-semibold text-[13px]">{info.label}:</strong>
+                  <span className="text-[#666] text-xs">{info.value}</span>
                 </div>
               ))}
             </div>
@@ -640,8 +631,10 @@ const handleUpdateStatus = async (nextStatusValue) => {
         </div>
 
         {attachmentCandidates.length > 0 && (
-          <div className="detail-section">
-            <h4>Attachments</h4>
+          <div className="mb-8 bg-gray-50 p-5 rounded-lg">
+            <h4 className="text-[#800000] text-base font-semibold mb-4 pb-2 border-b-2 border-gray-200">
+              Attachments
+            </h4>
             {attachmentCandidates.map((file, index) => {
               const label =
                 typeof file === "string"
@@ -650,10 +643,10 @@ const handleUpdateStatus = async (nextStatusValue) => {
               const url = typeof file === "string" ? file : file?.url || file?.downloadURL;
 
               return (
-                <div className="attachment-item" key={`${label}-${index}`}>
+                <div className="flex justify-between items-center p-4 bg-white rounded-lg border border-gray-200" key={`${label}-${index}`}>
                   <span>📎 {label}</span>
                   {url && (
-                    <a className="btn-link" href={url} target="_blank" rel="noreferrer">
+                    <a className="text-[#800000] font-medium underline text-sm hover:text-[#600000]" href={url} target="_blank" rel="noreferrer">
                       Open
                     </a>
                   )}
@@ -666,7 +659,7 @@ const handleUpdateStatus = async (nextStatusValue) => {
     );
   };
 
-  const visibleTabs = modalMode === "view" ? VIEW_TABS : MANAGE_TABS;
+  const visibleTabs = MANAGE_TABS;
   const getRoleLabel = (role) => (role === "kasama" ? "Kasama" : "Staff");
   const getAssignmentValue = (role, email) => {
     const normalizedRole = (role || "").toLowerCase();
@@ -729,35 +722,38 @@ const handleUpdateStatus = async (nextStatusValue) => {
     return `${roleLabel}: ${identifier}`;
   };
 
+  const formatNoteTimestamp = (value) => {
+    if (!value) return "Just now";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "Just now";
+    return date.toLocaleString();
+  };
+
   return (
-    <div className="monitor-complaints-page">
+    <div className="flex min-h-screen p-5 mt-14">
       <SideBar />
       <AdminNavbar />
 
-      <div className="main-content">
-        <div className="page-header">
-          <div>
-            <h2>Monitor Student Complaints</h2>
-            <p>View and manage all student complaints</p>
-          </div>
-        </div>
+      <div className="flex-1 ml-0 p-5 mt-10 lg:px-10 min-h-screen">       
 
         {/* Filters */}
-        <div className="filters-section">
-          <div className="filter-group">
-            <label>Search:</label>
+        <div className="bg-white p-6 rounded-xl shadow-md mb-8 flex gap-5 flex-wrap mx-5">
+          <div className="flex-1 min-w-[200px]">
+            <label className="block font-semibold text-[#800000] mb-2 text-sm">Search:</label>
             <input
               type="text"
-              placeholder="Search by ID or College..."
+              placeholder="Search by ID..."
               value={filters.search}
               onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+              className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg text-sm transition-all focus:outline-none focus:border-[#800000] focus:ring-4 focus:ring-[#800000]/10"
             />
           </div>
-          <div className="filter-group">
-            <label>Category:</label>
+          <div className="flex-1 min-w-[200px]">
+            <label className="block font-semibold text-[#800000] mb-2 text-sm">Category:</label>
             <select
               value={filters.category}
               onChange={(e) => setFilters({ ...filters, category: e.target.value })}
+              className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg text-sm transition-all focus:outline-none focus:border-[#800000] focus:ring-4 focus:ring-[#800000]/10"
             >
               <option value="all">All</option>
               <option value="academic">Academic</option>
@@ -767,11 +763,12 @@ const handleUpdateStatus = async (nextStatusValue) => {
               <option value="other">Other</option>
             </select>
           </div>
-          <div className="filter-group">
-            <label>Status:</label>
+          <div className="flex-1 min-w-[200px]">
+            <label className="block font-semibold text-[#800000] mb-2 text-sm">Status:</label>
             <select
               value={filters.status}
               onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+              className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg text-sm transition-all focus:outline-none focus:border-[#800000] focus:ring-4 focus:ring-[#800000]/10"
             >
               <option value="all">All</option>
               {STATUS_OPTIONS.map((statusValue) => (
@@ -783,51 +780,48 @@ const handleUpdateStatus = async (nextStatusValue) => {
           </div>
         </div>
 
-       {/* Table */} 
-          <div className="table-container">
-            <table className="complaints-table">
-              <thead>
+        {/* Table */}
+        <div className="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden mb-8 relative">
+          <table className="w-full border-collapse">
+            <thead className="bg-gradient-to-r from-[#8B1538]/8 to-[#a94922]/6 border-b-2 border-[#8B1538]/15">
+              <tr>
+                <th className="px-6 py-4 text-left font-bold text-[0.85rem] text-[#621313] uppercase tracking-wide">ID</th>
+                <th className="px-6 py-4 text-left font-bold text-[0.85rem] text-[#621313] uppercase tracking-wide">Category</th>
+                <th className="px-6 py-4 text-left font-bold text-[0.85rem] text-[#621313] uppercase tracking-wide">Status</th>
+                <th className="px-6 py-4 text-left font-bold text-[0.85rem] text-[#621313] uppercase tracking-wide">Date</th>
+                <th className="px-6 py-4 text-left font-bold text-[0.85rem] text-[#621313] uppercase tracking-wide">Assigned To</th>
+                <th className="px-6 py-4 text-left font-bold text-[0.85rem] text-[#621313] uppercase tracking-wide">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredComplaints.length === 0 ? (
                 <tr>
-                  <th>ID</th>
-                  <th>College</th>
-                  <th>Category</th>
-                  <th>Status</th>
-                  <th>Date</th>
-                  <th>Assigned To</th>
-                  <th>Actions</th>
+                  <td colSpan="7" className="text-center py-10 text-[#999] italic">
+                    No complaints found
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {filteredComplaints.length === 0 ? (
-                  <tr>
-                    <td colSpan="7" className="no-data">
-                      No complaints found
-                    </td>
-                  </tr>
-                ) : (
-                  filteredComplaints.map((c) => {
-                    const assignmentValue = getComplaintAssignmentValue(c);
-                    const assignmentOptionExists = assignmentUsers.some(
-                      (user) => getAssignmentValue(user.role, user.email) === assignmentValue
-                    );
-                    return (
-                    <tr key={c.id}>
-                      <td>{c.id}</td>
-                      <td>{c.college || "—"}</td>
-                      <td>{getCategoryLabel(c.category)}</td>
-                      <td>
-                      <span 
-                        className={`status-badge ${getStatusClass(c.status)}`}
-                        onClick={() => openModalForStatusChange(c)}  // Open modal to change status
-                        style={{ cursor: "pointer" }}  // Show pointer cursor on hover
-                      >
-                        {formatStatusLabel(c.status)}
-                      </span>
-                    </td>
-                      <td>{formatDateTime(c.submissionDate)}</td>
-                      <td>
+              ) : (
+                filteredComplaints.map((c) => {
+                  const assignmentValue = getComplaintAssignmentValue(c);
+                  const assignmentOptionExists = assignmentUsers.some(
+                    (user) => getAssignmentValue(user.role, user.email) === assignmentValue
+                  );
+                  return (
+                    <tr key={c.id} className="hover:bg-[#fef5f5] transition-colors">
+                      <td className="px-3 py-3.5 text-[13px] text-[#333] font-semibold">{c.id}</td>
+                      <td className="px-3 py-3.5 text-[13px] text-[#333]">{getCategoryLabel(c.category)}</td>
+                      <td className="px-3 py-3.5 text-[13px] text-[#333]">
+                        <span
+                          className={`inline-block px-3.5 py-1.5 rounded-full text-xs font-semibold capitalize cursor-pointer ${getStatusClass(c.status)}`}
+                          onClick={() => openModalForStatusChange(c)}
+                        >
+                          {formatStatusLabel(c.status)}
+                        </span>
+                      </td>
+                      <td className="px-3 py-3.5 text-[13px] text-[#333]">{formatDateTime(c.submissionDate)}</td>
+                      <td className="px-3 py-3.5 text-[13px] text-[#333]">
                         <select
-                          className="assignment-dropdown"
+                          className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-[13px] bg-white text-[#111827] focus:outline-none focus:border-[#800000] focus:ring-2 focus:ring-[#800000]/15"
                           value={assignmentValue}
                           onChange={(e) => handleAssignSelectionChange(c, e.target.value)}
                         >
@@ -847,9 +841,9 @@ const handleUpdateStatus = async (nextStatusValue) => {
                           })}
                         </select>
                       </td>
-                      <td className="actions-cell">
+                      <td className="px-3 py-3.5 text-[13px] text-[#333]">
                         <button
-                          className="btn-note"
+                          className="bg-[#65b95e] text-white border-none px-3 py-1.5 rounded-[18px] cursor-pointer font-medium text-xs transition-all hover:bg-[#A84700] hover:-translate-y-0.5 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none ml-[15px]"
                           onClick={() => openNoteModal(c)}
                           disabled={!currentUser}
                           title={
@@ -861,7 +855,7 @@ const handleUpdateStatus = async (nextStatusValue) => {
                           {getSharedNote(c) ? "Update Note" : "Add Note"}
                         </button>
                         <button
-                          className="btn-view"
+                          className="bg-[#1094d0] text-white border-none px-3 py-1.5 rounded-[18px] cursor-pointer font-medium text-xs transition-all hover:bg-[#A84700] hover:-translate-y-0.5 hover:shadow-lg ml-2.5"
                           onClick={() => openModal(c)}
                           title="View the full complaint details"
                         >
@@ -869,273 +863,274 @@ const handleUpdateStatus = async (nextStatusValue) => {
                         </button>
                       </td>
                     </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
 
-          {assignmentError && (
-            <p className="inline-error" style={{ marginTop: "0.5rem" }}>
-              {assignmentError}
-            </p>
-          )}
+        {assignmentError && (
+          <p className="text-[#b91c1c] text-[13px] mt-2">
+            {assignmentError}
+          </p>
+        )}
 
-          {showModal && selectedComplaint && (
-            <div className="modal-overlay" onClick={closeModal}>
-              <div className="modal-container" onClick={(e) => e.stopPropagation()}>
-             <div className="modal-header">
-              <div>
-                <h3>Complaint #{selectedComplaint.id}</h3>
-                <p>
-                  {(selectedComplaint.college || "No college specified") +
-                    " - " +
-                    getCategoryLabel(selectedComplaint.category)}
-                </p>
-              </div>
-              <button className="btn-close" onClick={closeModal}>
-                X
-              </button>
-            </div>
-
-                <div className="modal-tabs">
-                  {visibleTabs.map((tabKey) => (
-                    <button
-                      key={tabKey}
-                      className={`tab-btn ${activeTab === tabKey ? "active" : ""}`}
-                      onClick={() => setActiveTab(tabKey)}
-                    >
-                      {TAB_LABELS[tabKey]}
-                    </button>
-                  ))}
-                  {modalMode === "view" && (
-                    <button className="btn-secondary manage-switch" onClick={() => switchToManageMode("details")}>
-                      Manage Complaint
-                    </button>
-                  )}
+        {showModal && selectedComplaint && (
+          <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-[1000] p-5 backdrop-blur-sm" onClick={closeModal}>
+            <div className="bg-white rounded-2xl w-full max-w-[900px] max-h-[90vh] flex flex-col shadow-2xl animate-[modalSlideIn_0.3s_ease]" onClick={(e) => e.stopPropagation()}>
+              <div className="px-[30px] py-[25px] border-b-2 border-gray-200 flex justify-between items-start bg-gradient-to-r from-[#800000] to-[#600000] text-white rounded-t-2xl">
+                <div>
+                  <h3 className="m-0 text-xl font-bold text-white">Complaint #{selectedComplaint.id}</h3>
+                  <p className="text-xs mt-1 opacity-90">
+                    {
+                      getCategoryLabel(selectedComplaint.category)}
+                  </p>
                 </div>
-
-                <div className="modal-body">
-                  {visibleTabs.includes("details") && activeTab === "details" && (
-                    <div className="tab-content">{renderComplaintDetails()}</div>
-                  )}
-
-                  {visibleTabs.includes("feedback") && activeTab === "feedback" && (
-                    <div className="tab-content">
-                      <h4>Feedback History</h4>
-                      {!selectedComplaint.feedbackHistory ||
-                      selectedComplaint.feedbackHistory.length === 0 ? (
-                        <p className="empty-state">No feedback shared yet.</p>
-                      ) : (
-                        <div className="feedback-history">
-                          {selectedComplaint.feedbackHistory.map((item, index) => (
-                            <div className="feedback-item" key={`${item.date || index}-${index}`}>
-                              <div className="feedback-header">
-                                <strong>{getFeedbackSenderLabel(item)}</strong>
-                                <span className="feedback-date">
-                                  {item.date ? formatDateTime(item.date) : "Just now"}
-                                </span>
-                              </div>
-                              <p>{item.feedback}</p>
-                              {item.files && item.files.length > 0 && (
-                                <div className="feedback-files">
-                                  {item.files.map((file, fileIndex) => (
-                                    <span className="file-tag" key={`${file}-${fileIndex}`}>
-                                      {file.name || file}
-                                    </span>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
-                      <div className="feedback-form">
-                        <h4>Send New Feedback</h4>
-                        <textarea
-                          rows="4"
-                          placeholder="Write your feedback to the student..."
-                          value={feedback}
-                          onChange={(e) => setFeedback(e.target.value)}
-                        ></textarea>
-
-                        <div className="file-upload-section">
-                          <label className="file-upload-label">
-                            <input
-                              type="file"
-                              multiple
-                              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                              onChange={handleFeedbackFileChange}
-                            />
-                            📎 Attach Files
-                          </label>
-                          {feedbackFiles.length > 0 && (
-                            <div className="selected-files">
-                              {feedbackFiles.map((file, index) => (
-                                <div className="file-chip" key={`${file.name}-${index}`}>
-                                  <span>{file.name}</span>
-                                  <button type="button" onClick={() => handleRemoveFeedbackFile(index)}>
-                                    ×
-                                  </button>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-
-                        <button className="btn-primary" onClick={handleSendFeedbackPersist}>
-                          Send Feedback
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  {visibleTabs.includes("notes") && activeTab === "notes" && (
-                    <div className="tab-content">
-                      <h4>Admin Notes (Private)</h4>
-                      {!selectedComplaint.adminNotes || selectedComplaint.adminNotes.length === 0 ? (
-                        <p className="empty-state">No notes have been added.</p>
-                      ) : (
-                        <div className="notes-history">
-                          {selectedComplaint.adminNotes.map((note) => (
-                            <div className="note-card" key={`${note.adminId}-${note.updatedAt}`}>
-                              <div className="note-card-header">
-                                <span className="note-author">
-                                  {note.adminName || "Unknown"} -{" "}
-                                  {note.adminRole ? note.adminRole.toUpperCase() : "ADMIN"}
-                                </span>
-                                <span className="note-timestamp">{formatNoteTimestamp(note.updatedAt)}</span>
-                              </div>
-                              <p className="note-text">{note.note}</p>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                      <button className="btn-secondary" onClick={() => openNoteModal(selectedComplaint)}>
-                        {getSharedNote(selectedComplaint) ? "Update Note" : "Add Note"}
-                      </button>
-                    </div>
-                  )}
-
-                  {visibleTabs.includes("assign") && activeTab === "assign" && (
-                    <div className="tab-content">
-                      <h4>Assignment</h4>
-                      <div className="current-assignment">
-                        <p>
-                          <strong>Assigned Role:</strong> {
-                            selectedComplaint.assignedRole
-                              ? selectedComplaint.assignedRole.toUpperCase()
-                              : "Unassigned"
-                          }
-                        </p>
-                        <p>
-                          <strong>Assigned To:</strong> {selectedComplaint.assignedTo || "Not yet assigned"}
-                        </p>
-                      </div>
-
-                      <div className="assign-form">
-                        <div className="form-group">
-                          <label>Assign To:</label>
-                          <select value={assignTo} onChange={(e) => setAssignTo(e.target.value)}>
-                            <option value="">Unassigned</option>
-                            {!assignSelectionExists && assignTo && (
-                              <option value={assignTo}>{getAssignmentLabelFromValue(assignTo)}</option>
-                            )}
-                            {assignmentUsers.map((user) => {
-                              const optionValue = getAssignmentValue(user.role, user.email);
-                              return (
-                                <option key={user.id} value={optionValue}>
-                                  {getAssignmentLabel(user.role, user.email)}
-                                </option>
-                              );
-                            })}
-                          </select>
-                        </div>
-
-                        <div className="form-group">
-                          <label>Message/Instructions:</label>
-                          <textarea
-                            rows="3"
-                            placeholder="Add context for the assignee (optional)"
-                            value={assignMessage}
-                            onChange={(e) => setAssignMessage(e.target.value)}
-                          ></textarea>
-                        </div>
-
-                        {assignmentError && <p className="inline-error">{assignmentError}</p>}
-
-                        <button className="btn-primary" onClick={handleAssignComplaint}>
-                          {selectedComplaint.assignedTo ? "Reassign" : "Assign"} Complaint
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  {visibleTabs.includes("status") && activeTab === "status" && (
-                    <div className="tab-content">
-                      <h4>Status Management</h4>
-
-                      <div className="current-status-display">
-                        <p>
-                          <strong>Current Status:</strong>
-                        </p>
-                        <span className={`status-badge ${getStatusClass(selectedComplaint.status)}`}>
-                          {formatStatusLabel(selectedComplaint.status)}
-                        </span>
-                      </div>
-
-                      <div className="status-form">
-                        <div className="form-group">
-                          <label>New Status:</label>
-                          <select value={newStatus} onChange={(e) => setNewStatus(e.target.value)}>
-                            {STATUS_OPTIONS.map((statusValue) => (
-                              <option key={statusValue} value={statusValue}>
-                                {formatStatusLabel(statusValue)}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                        <button className="btn-primary" onClick={() => handleUpdateStatus(newStatus)}>
-                          Update Status
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-        {noteModalComplaint && (
-          <div className="modal-overlay" onClick={closeNoteModal}>
-            <div className="modal-container note-modal" onClick={(e) => e.stopPropagation()}>
-              <div className="modal-header">
-                <h3>
-                  {getSharedNote(noteModalComplaint) ? "Update" : "Add"} Note - {noteModalComplaint.id}
-                </h3>
-                <button className="btn-close" onClick={closeNoteModal}>
+                <button className="text-white w-[30px] h-[30px] cursor-pointer flex items-center justify-center transition-all hover:bg-white/30 hover:rotate-90 hover:rounded-[20px] border-none text-lg" onClick={closeModal}>
                   ×
                 </button>
               </div>
-              <div className="modal-body">
-                <p className="modal-subtext">
+
+              <div className="flex bg-[#fafafa] p-0 border-b-2 border-gray-200">
+                {visibleTabs.map((tabKey) => (
+                  <button
+                    key={tabKey}
+                    className={`flex-1 px-5 py-4 bg-transparent border-none cursor-pointer font-medium text-sm text-[#666] transition-all border-b-[3px] border-transparent hover:bg-gray-100 hover:text-[#800000] ${
+                      activeTab === tabKey ? "bg-white text-[#800000] border-b-[#800000] font-semibold" : ""
+                    }`}
+                    onClick={() => setActiveTab(tabKey)}
+                  >
+                    {TAB_LABELS[tabKey]}
+                  </button>
+                ))}
+                
+              </div>
+
+              <div className="px-[30px] py-5 overflow-y-auto flex-1">
+                {visibleTabs.includes("details") && activeTab === "details" && (
+                  <div>{renderComplaintDetails()}</div>
+                )}
+
+                {visibleTabs.includes("feedback") && activeTab === "feedback" && (
+                  <div>
+                    <h4 className="text-[#800000] text-lg font-semibold m-0 mb-5 pb-2.5 border-b-2 border-gray-200">Feedback History</h4>
+                    {!selectedComplaint.feedbackHistory ||
+                    selectedComplaint.feedbackHistory.length === 0 ? (
+                      <p className="text-center py-10 text-[#999] italic bg-[#fafafa] rounded-lg">No feedback shared yet.</p>
+                    ) : (
+                      <div className="mb-6">
+                        {selectedComplaint.feedbackHistory.map((item, index) => (
+                          <div className="bg-[#fafafa] p-4 rounded-lg mb-3 border-l-4 border-[#800000]" key={`${item.date || index}-${index}`}>
+                            <div className="flex justify-between items-center mb-2.5">
+                              <strong className="text-[#800000] text-sm">{getFeedbackSenderLabel(item)}</strong>
+                              <span className="text-[#999] text-xs">
+                                {item.date ? formatDateTime(item.date) : "Just now"}
+                              </span>
+                            </div>
+                            <p className="text-[#333] text-sm m-0 leading-relaxed">{item.feedback}</p>
+                            {item.files && item.files.length > 0 && (
+                              <div className="flex gap-2 flex-wrap mt-2.5">
+                                {item.files.map((file, fileIndex) => (
+                                  <span className="inline-block px-2.5 py-1 bg-white border border-gray-200 rounded text-xs text-[#666]" key={`${file}-${fileIndex}`}>
+                                    {file.name || file}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    <div className="bg-white p-6 rounded-xl border-2 border-gray-200 mt-5">
+                      <h4 className="text-[#800000] text-lg font-semibold m-0 mb-5 pb-2.5 border-b-2 border-gray-200">Send New Feedback</h4>
+                      <textarea
+                        rows="4"
+                        placeholder="Write your feedback to the student..."
+                        value={feedback}
+                        onChange={(e) => setFeedback(e.target.value)}
+                        className="w-full px-[18px] py-[15px] border border-[#d0d0d0] rounded-xl text-[15px] text-[#333] resize-vertical shadow-sm transition-all mb-[15px] focus:outline-none focus:border-[#800000] focus:ring-4 focus:ring-[#800000]/15"
+                      ></textarea>
+
+                      <div className="my-5">
+                        <label className="inline-block px-5 py-2.5 bg-[#fef5f5] text-[#800000] border-2 border-dashed border-[#800000] rounded-lg cursor-pointer font-medium transition-all hover:bg-[#800000] hover:text-white">
+                          <input
+                            type="file"
+                            multiple
+                            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                            onChange={handleFeedbackFileChange}
+                            className="hidden"
+                          />
+                          📎 Attach Files
+                        </label>
+                        {feedbackFiles.length > 0 && (
+                          <div className="mt-4 flex flex-wrap gap-2.5">
+                            {feedbackFiles.map((file, index) => (
+                              <div className="flex items-center gap-2 px-3 py-2 bg-[#fafafa] border border-gray-200 rounded-md text-[13px]" key={`${file.name}-${index}`}>
+                                <span>{file.name}</span>
+                                <button type="button" onClick={() => handleRemoveFeedbackFile(index)} className="bg-[#800000] text-white border-none rounded-full w-5 h-5 cursor-pointer text-sm leading-none transition-all hover:bg-[#600000] hover:scale-110">
+                                  ×
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      <button className="bg-[#800000] text-white border-none px-[18px] py-2.5 rounded-lg cursor-pointer font-normal text-sm transition-all mt-4 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-[#800000]/30" onClick={handleSendFeedbackPersist}>
+                        Send Feedback
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {visibleTabs.includes("notes") && activeTab === "notes" && (
+                  <div>
+                    <h4 className="text-[#800000] text-lg font-semibold m-0 mb-5 pb-2.5 border-b-2 border-gray-200">Admin Notes (Private)</h4>
+                    {!selectedComplaint.adminNotes || selectedComplaint.adminNotes.length === 0 ? (
+                      <p className="text-center py-10 text-[#999] italic bg-[#fafafa] rounded-lg">No notes have been added.</p>
+                    ) : (
+                      <div className="mb-6">
+                        {selectedComplaint.adminNotes.map((note) => (
+                          <div className="bg-[#f8fafc] border border-gray-300 rounded-xl px-3.5 py-3" key={`${note.adminId}-${note.updatedAt}`}>
+                            <div className="flex justify-between items-center text-xs text-[#475569] mb-1.5">
+                              <span className="font-medium">
+                                {note.adminName || "Unknown"} -{" "}
+                                {note.adminRole ? note.adminRole.toUpperCase() : "ADMIN"}
+                              </span>
+                              <span>{formatNoteTimestamp(note.updatedAt)}</span>
+                            </div>
+                            <p className="m-0 text-sm text-[#1f2937]">{note.note}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    <button className="bg-[#800000] text-white border-none px-[18px] py-2.5 rounded-lg cursor-pointer font-normal text-sm transition-colors mt-4 hover:bg-[#d1d5db]" onClick={() => openNoteModal(selectedComplaint)}>
+                      {getSharedNote(selectedComplaint) ? "Update Note" : "Add Note"}
+                    </button>
+                  </div>
+                )}
+
+                {visibleTabs.includes("assign") && activeTab === "assign" && (
+                  <div>
+                    <h4 className="text-[#800000] text-lg font-semibold m-0 mb-5 pb-2.5 border-b-2 border-gray-200">Assignment</h4>
+                    <div className="bg-[#e8f5e9] p-4 rounded-lg mb-5 border-l-4 border-[#4CAF50]">
+                      <p className="m-0 text-[#333] text-sm">
+                        <strong>Assigned Role:</strong> {
+                          selectedComplaint.assignedRole
+                            ? selectedComplaint.assignedRole.toUpperCase()
+                            : "Unassigned"
+                        }
+                      </p>
+                      <p className="m-0 text-[#333] text-sm mt-2">
+                        <strong>Assigned To:</strong> {selectedComplaint.assignedTo || "Not yet assigned"}
+                      </p>
+                    </div>
+
+                    <div className="bg-white p-6 rounded-xl border-2 border-gray-200 mt-5">
+                      <div className="mb-5">
+                        <label className="block font-semibold text-[#800000] mb-2 text-sm">Assign To:</label>
+                        <select value={assignTo} onChange={(e) => setAssignTo(e.target.value)} className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg text-sm transition-all focus:outline-none focus:border-[#800000] focus:ring-4 focus:ring-[#800000]/10">
+                          <option value="">Unassigned</option>
+                          {!assignSelectionExists && assignTo && (
+                            <option value={assignTo}>{getAssignmentLabelFromValue(assignTo)}</option>
+                          )}
+                          {assignmentUsers.map((user) => {
+                            const optionValue = getAssignmentValue(user.role, user.email);
+                            return (
+                              <option key={user.id} value={optionValue}>
+                                {getAssignmentLabel(user.role, user.email)}
+                              </option>
+                            );
+                          })}
+                        </select>
+                      </div>
+
+                      <div className="mb-5">
+                        <label className="block font-semibold text-[#800000] mb-2 text-sm">Message/Instructions:</label>
+                        <textarea
+                          rows="3"
+                          placeholder="Add context for the assignee (optional)"
+                          value={assignMessage}
+                          onChange={(e) => setAssignMessage(e.target.value)}
+                          className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg text-sm resize-vertical transition-all focus:outline-none focus:border-[#800000] focus:ring-4 focus:ring-[#800000]/10"
+                        ></textarea>
+                      </div>
+
+                      {assignmentError && <p className="text-[#b91c1c] text-[13px] mb-3">{assignmentError}</p>}
+
+                      <button className="bg-[#800000] text-white border-none px-[18px] py-2.5 rounded-lg cursor-pointer font-normal text-sm transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-[#800000]/30" onClick={handleAssignComplaint}>
+                        {selectedComplaint.assignedTo ? "Reassign" : "Assign"} Complaint
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {visibleTabs.includes("status") && activeTab === "status" && (
+                  <div>
+                    <h4 className="text-[#800000] text-lg font-semibold m-0 mb-5 pb-2.5 border-b-2 border-gray-200">Status Management</h4>
+
+                    <div className="bg-[#fef5f5] p-5 rounded-lg mb-5 text-center">
+                      <p className="m-0 mb-2.5 text-[#666] font-medium">
+                        <strong>Current Status:</strong>
+                      </p>
+                      <span className={`inline-block px-3.5 py-1.5 rounded-full text-xs font-semibold capitalize ${getStatusClass(selectedComplaint.status)}`}>
+                        {formatStatusLabel(selectedComplaint.status)}
+                      </span>
+                    </div>
+
+                    <div className="bg-white p-6 rounded-xl border-2 border-gray-200 mt-5">
+                      <div className="mb-5">
+                        <label className="block font-semibold text-[#800000] mb-2 text-sm">New Status:</label>
+                        <select value={newStatus} onChange={(e) => setNewStatus(e.target.value)} className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg text-sm transition-all focus:outline-none focus:border-[#800000] focus:ring-4 focus:ring-[#800000]/10">
+                          {STATUS_OPTIONS.map((statusValue) => (
+                            <option key={statusValue} value={statusValue}>
+                              {formatStatusLabel(statusValue)}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <button className="bg-[#800000] text-white border-none px-[18px] py-2.5 rounded-lg cursor-pointer font-normal text-sm transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-[#800000]/30" onClick={() => handleUpdateStatus(newStatus)}>
+                        Update Status
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {noteModalComplaint && (
+          <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-[1000] p-5 backdrop-blur-sm" onClick={closeNoteModal}>
+            <div className="bg-white rounded-2xl w-full max-w-[520px] max-h-[90vh] flex flex-col shadow-2xl animate-[modalSlideIn_0.3s_ease]" onClick={(e) => e.stopPropagation()}>
+              <div className="px-[30px] py-[25px] border-b-2 border-gray-200 flex justify-between items-start bg-gradient-to-r from-[#800000] to-[#600000] text-white rounded-t-2xl">
+                <h3 className="m-0 text-xl font-bold text-white">
+                  {getSharedNote(noteModalComplaint) ? "Update" : "Add"} Note - {noteModalComplaint.id}
+                </h3>
+                <button className="text-white w-[30px] h-[30px] cursor-pointer flex items-center justify-center transition-all hover:bg-white/30 hover:rotate-90 hover:rounded-[20px] border-none text-lg" onClick={closeNoteModal}>
+                  ×
+                </button>
+              </div>
+              <div className="px-[30px] py-5 overflow-y-auto flex-1">
+                <p className="text-[#6b7280] text-xs mb-3">
                   Notes are shared with admins and the assigned role ({noteRole?.toUpperCase()}).
                 </p>
                 <textarea
-                  className="note-textarea"
+                  className="w-full min-h-[140px] border border-[#d1d5db] rounded-xl px-3.5 py-3 text-sm resize-vertical transition-all focus:border-[#800000] focus:ring-[3px] focus:ring-[#800000]/12 focus:outline-none"
                   placeholder="Write a quick update for this complaint..."
                   value={noteInput}
                   onChange={(e) => setNoteInput(e.target.value)}
                 />
-                {noteError && <p className="error-text">{noteError}</p>}
+                {noteError && <p className="text-[#b91c1c] text-[13px] mt-2">{noteError}</p>}
               </div>
-              <div className="modal-footer">
-                <button className="btn-secondary" onClick={closeNoteModal} disabled={isSavingNote}>
+              <div className="flex justify-end gap-3 px-[30px] py-5 border-t border-gray-200">
+                <button className="bg-[#800000] text-white border-none px-[18px] py-2.5 rounded-lg cursor-pointer font-normal text-sm transition-colors hover:bg-[#d1d5db] disabled:opacity-70 disabled:cursor-not-allowed" onClick={closeNoteModal} disabled={isSavingNote}>
                   Cancel
                 </button>
                 <button
-                  className="btn-primary"
+                  className="bg-[#800000] text-white border-none px-[18px] py-2.5 rounded-lg cursor-pointer font-normal text-sm transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
                   onClick={handleSaveAdminNote}
                   disabled={isSavingNote}
                 >
@@ -1149,18 +1144,9 @@ const handleUpdateStatus = async (nextStatusValue) => {
             </div>
           </div>
         )}
-        </div>
+      </div>
     </div>
-    );
-  };
-
-  const formatNoteTimestamp = (value) => {
-    if (!value) return "Just now";
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return "Just now";
-    return date.toLocaleString();
-  };
+  );
+};
 
 export default AdminMonitorComplaints;
-
-

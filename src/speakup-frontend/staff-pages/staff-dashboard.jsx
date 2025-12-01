@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { useAuth } from '../../contexts/authContext'; // Import useAuth for fetching user data
+import { useAuth } from '../../contexts/authContext';
 import { BarChart3, Users, AlertTriangle, CheckCircle, FileText } from 'lucide-react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase/firebase';
-import '../../styles/styles-admin/admin.css';
 import StaffSideBar from './components/StaffSideBar';
 import StaffNavBar from './components/StaffNavBar';
 import UrgentComplaintsWidget from './components/urgency-level';
@@ -122,101 +121,77 @@ const StaffDashboard = () => {
 
   const formatStatValue = (value) => (isLoadingStats ? '...' : value);
 
-  const getUrgencyClass = (urgency) => {
-    switch (urgency.toLowerCase()) {
-      case 'high':
-        return 'urgency-high';
-      case 'medium':
-        return 'urgency-medium';
-      case 'low':
-        return 'urgency-low';
-      default:
-        return '';
-    }
-  };
-
-  const getStatusClass = (status) => {
-    switch (status.toLowerCase()) {
-      case 'pending':
-        return 'status-pending';
-      case 'in progress':
-        return 'status-progress';
-      case 'resolved':
-        return 'status-resolved';
-      default:
-        return '';
-    }
-  };
-
-  // Get greeting based on time of day
-  const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return 'Good Morning';
-    if (hour < 18) return 'Good Afternoon';
-    return 'Good Evening';
-  };
-
   return (
-    <div className="admin-container">
+    <div className="flex min-h-screen">
       {/* Sidebar */}
       <StaffSideBar />
 
       {/* Main Content */}
-      <main className="main-content">
+      <main className="flex-1 transition-all duration-300 flex flex-col">
         <StaffNavBar />
 
-
         {/* Analytics Cards */}
-        <div className="analytics-grid">
-          <div className="stat-card">
-            <div className="stat-icon total">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-6 p-10 pt-24 mt-8">
+          {/* Total Complaints Card */}
+          <div className="bg-white p-6 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.1)] flex items-center gap-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_4px_12px_rgba(0,0,0,0.15)]">
+            <div className="w-[60px] h-[60px] rounded-xl flex items-center justify-center text-white bg-gradient-to-br from-[#800000] to-[#993333]">
               <FileText size={24} />
             </div>
-            <div className="stat-content">
-              <h3 className="stat-value">{formatStatValue(stats.total)}</h3>
-              <p className="stat-label">Total Complaints</p>
+            <div className="flex-1">
+              <h3 className="text-3xl font-bold text-[#333333] mb-1">
+                {formatStatValue(stats.total)}
+              </h3>
+              <p className="text-[#6c757d] text-sm">Total Complaints</p>
             </div>
           </div>
 
-          <div className="stat-card">
-            <div className="stat-icon pending">
+          {/* Pending Card */}
+          <div className="bg-white p-6 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.1)] flex items-center gap-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_4px_12px_rgba(0,0,0,0.15)]">
+            <div className="w-[60px] h-[60px] rounded-xl flex items-center justify-center text-white bg-gradient-to-br from-[#ff6b6b] to-[#ff8787]">
               <AlertTriangle size={24} />
             </div>
-            <div className="stat-content">
-              <h3 className="stat-value">{formatStatValue(stats.pending)}</h3>
-              <p className="stat-label">Pending</p>
+            <div className="flex-1">
+              <h3 className="text-3xl font-bold text-[#333333] mb-1">
+                {formatStatValue(stats.pending)}
+              </h3>
+              <p className="text-[#6c757d] text-sm">Pending</p>
             </div>
           </div>
 
-          <div className="stat-card">
-            <div className="stat-icon progress">
+          {/* In Progress Card */}
+          <div className="bg-white p-6 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.1)] flex items-center gap-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_4px_12px_rgba(0,0,0,0.15)]">
+            <div className="w-[60px] h-[60px] rounded-xl flex items-center justify-center text-white bg-gradient-to-br from-[#E6C200] to-[#FFD700]">
               <BarChart3 size={24} />
             </div>
-            <div className="stat-content">
-              <h3 className="stat-value">{formatStatValue(stats.inProgress)}</h3>
-              <p className="stat-label">In Progress</p>
+            <div className="flex-1">
+              <h3 className="text-3xl font-bold text-[#333333] mb-1">
+                {formatStatValue(stats.inProgress)}
+              </h3>
+              <p className="text-[#6c757d] text-sm">In Progress</p>
             </div>
           </div>
 
-          <div className="stat-card">
-            <div className="stat-icon resolved">
+          {/* Resolved Card */}
+          <div className="bg-white p-6 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.1)] flex items-center gap-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_4px_12px_rgba(0,0,0,0.15)]">
+            <div className="w-[60px] h-[60px] rounded-xl flex items-center justify-center text-white bg-gradient-to-br from-[#28a745] to-[#34d058]">
               <CheckCircle size={24} />
             </div>
-            <div className="stat-content">
-              <h3 className="stat-value">{formatStatValue(stats.resolved)}</h3>
-              <p className="stat-label">Resolved & Closed</p>
+            <div className="flex-1">
+              <h3 className="text-3xl font-bold text-[#333333] mb-1">
+                {formatStatValue(stats.resolved)}
+              </h3>
+              <p className="text-[#6c757d] text-sm">Resolved & Closed</p>
             </div>
           </div>
         </div>
 
         {statsError && (
-          <p className="stats-error-message" style={{ color: '#b91c1c', marginTop: '0.5rem' }}>
+          <p className="text-[#b91c1c] mt-2 px-8">
             {statsError}
           </p>
         )}
 
         <UrgentComplaintsWidget />
-
       </main>
     </div>
   );

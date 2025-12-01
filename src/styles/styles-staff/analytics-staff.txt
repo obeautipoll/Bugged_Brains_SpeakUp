@@ -1,13 +1,12 @@
 .staff-analytics-container {
   display: flex;
   min-height: 100vh;
-  background-color: #f8fafc;
 }
 
 .main-content {
   flex: 1;
   padding: 25px 20px 20px 30px; /* Increased top and left padding */
-  margin-left: 250px;
+  margin-left: 0px;
   transition: margin-left 0.3s ease, padding 0.3s ease;
 }
 

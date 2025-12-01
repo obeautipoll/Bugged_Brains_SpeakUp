@@ -23,12 +23,10 @@ import AdminUserManage from "./speakup-frontend/admin-pages/admin-userManage";
 import AdminMonitorComplaints from "./speakup-frontend/admin-pages/admin-monitoring";
 import AdminAnalytics from "./speakup-frontend/admin-pages/admin-analytics";
 import AdminNotifications from "./speakup-frontend/admin-pages/admin-notifications";
-import AdminAboutInfo from "./speakup-frontend/admin-pages/admin-about-info";
 
 // Staff / KASAMA Pages
 import StaffDashboard from "./speakup-frontend/staff-pages/staff-dashboard";
 import StaffMonitorComplaints from "./speakup-frontend/staff-pages/staff-monitoring";
-import StaffAnalytics from "./speakup-frontend/staff-pages/staff-analytics";
 import StaffNotifications from "./speakup-frontend/staff-pages/staff-notification";
 
 const roleMatches = (userRole, required) => {
@@ -133,20 +131,12 @@ function App() {
       element: <PrivateRoute element={<AdminNotifications />} requiredRole="admin" />,
     },
     {
-      path: "/aaboutinfo",
-      element: <PrivateRoute element={<AdminAboutInfo />} requiredRole="admin" />,
-    },
-    {
       path: "/sdashboard",
       element: <PrivateRoute element={<StaffDashboard />} requiredRole={["staff", "kasama"]} />,
     },
     {
       path: "/smonitorcomplaints",
       element: <PrivateRoute element={<StaffMonitorComplaints />} requiredRole={["staff", "kasama"]} />,
-    },
-    {
-      path: "/sanalytics",
-      element: <PrivateRoute element={<StaffAnalytics />} requiredRole={["staff", "kasama"]} />,
     },
     {
       path: "/snotifications",

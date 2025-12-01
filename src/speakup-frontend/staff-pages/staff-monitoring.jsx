@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
-import "../../styles/styles-staff/monitor-staff.css";
 import StaffSideBar from "./components/StaffSideBar";
 import StaffNavBar from "./components/StaffNavBar";
 import { db } from "../../firebase/firebase";
@@ -560,99 +559,104 @@ const getStatusClass = (status) => {
 
   const visibleTabs = modalMode === "view" ? VIEW_TABS : MANAGE_TABS;
 
-  return (
-    <div className="monitor-complaints-page">
+return (
+  <div className="flex min-h-screen">
+      {/* Sidebar */}
       <StaffSideBar />
-      <StaffNavBar />
 
-      <div className="main-content">
-       
+      {/* Main Content */}
+      <main className="flex-1 transition-all duration-300 flex flex-col ml-0">
+          <StaffNavBar />
 
-        {/* Filters */}
-        <div className="filters-section">
-          <div className="filter-group">
-            <label>Search:</label>
-            <input
-              type="text"
-              placeholder="Search by ID ..."
-              value={filters.search}
-              onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-            />
-          </div>
-          <div className="filter-group">
-            <label>Category:</label>
-            <select
-              value={filters.category}
-              onChange={(e) => setFilters({ ...filters, category: e.target.value })}
-            >
-              <option value="all">All</option>
-              <option value="academic">Academic</option>
-              <option value="faculty-conduct">Faculty Conduct</option>
-              <option value="facilities">Facilities</option>
-              <option value="administrative-student-services">Admin/Student Services</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
-          <div className="filter-group">
-           <label>Status:</label>
-            <select
-                  value={filters.status}
-                  onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-                >
-                  <option value="all">All</option>
-                  <option value="pending">Pending</option>
-                  <option value="in-progress">In Progress</option>
-                  <option value="resolved">Resolved</option>
-                  <option value="closed">Closed</option>
-            </select>
-            
-          </div>
+      <div className="flex-1 mt-24 mx-8 mb-8 p-4 sm:p-6 lg:p-10">      
+      {/* Filters */}
+      <div className="bg-white p-4 sm:p-6 rounded-xl shadow-md mb-6 sm:mb-8 flex flex-col sm:flex-row gap-4 sm:gap-5 mx-0 sm:mx-5">
+        <div className="flex-1 min-w-[200px]">
+          <label className="block font-semibold text-[#800000] mb-2 text-sm">Search:</label>
+          <input
+            type="text"
+            placeholder="Search by ID ..."
+            value={filters.search}
+            onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+            className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg text-sm transition-all duration-300 focus:outline-none focus:border-[#800000] focus:ring-4 focus:ring-[#800000]/10"
+          />
         </div>
+        <div className="flex-1 min-w-[200px]">
+          <label className="block font-semibold text-[#800000] mb-2 text-sm">Category:</label>
+          <select
+            value={filters.category}
+            onChange={(e) => setFilters({ ...filters, category: e.target.value })}
+            className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg text-sm transition-all duration-300 focus:outline-none focus:border-[#800000] focus:ring-4 focus:ring-[#800000]/10"
+          >
+            <option value="all">All</option>
+            <option value="academic">Academic</option>
+            <option value="faculty-conduct">Faculty Conduct</option>
+            <option value="facilities">Facilities</option>
+            <option value="administrative-student-services">Admin/Student Services</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div className="flex-1 min-w-[200px]">
+          <label className="block font-semibold text-[#800000] mb-2 text-sm">Status:</label>
+          <select
+            value={filters.status}
+            onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+            className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg text-sm transition-all duration-300 focus:outline-none focus:border-[#800000] focus:ring-4 focus:ring-[#800000]/10"
+          >
+            <option value="all">All</option>
+            <option value="pending">Pending</option>
+            <option value="in-progress">In Progress</option>
+            <option value="resolved">Resolved</option>
+            <option value="closed">Closed</option>
+          </select>
+        </div>
+      </div>
 
-       {/* Table */} 
-          <div className="table-container">
-            <table className="complaints-table">
-              <thead>
+      {/* Table */}
+      <div className="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden mb-8">
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse">
+            <thead className="bg-gradient-to-r from-[#8B1538]/8 to-[#A94922]/6 border-b-2 border-[#8B1538]/15">
+              <tr>
+                <th className="px-4 sm:px-6 py-4 text-left font-bold text-xs sm:text-sm text-[#621313] uppercase tracking-wide">ID</th>
+                <th className="px-4 sm:px-6 py-4 text-left font-bold text-xs sm:text-sm text-[#621313] uppercase tracking-wide">Category</th>
+                <th className="px-4 sm:px-6 py-4 text-left font-bold text-xs sm:text-sm text-[#621313] uppercase tracking-wide">Status</th>
+                <th className="px-4 sm:px-6 py-4 text-left font-bold text-xs sm:text-sm text-[#621313] uppercase tracking-wide hidden sm:table-cell">Date</th>
+                <th className="px-4 sm:px-6 py-4 text-left font-bold text-xs sm:text-sm text-[#621313] uppercase tracking-wide">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredComplaints.length === 0 ? (
                 <tr>
-                  <th>ID</th>
-                  <th>Category</th>
-                  <th>Status</th>
-                  <th>Date</th>
-                  <th>Actions</th>
+                  <td colSpan="7" className="text-center py-10 text-gray-400 italic text-sm">
+                    No complaints found
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {filteredComplaints.length === 0 ? (
-                  <tr>
-                    <td colSpan="7" className="no-data">
-                      No complaints found
-                    </td>
-                  </tr>
-                ) : (
-                  filteredComplaints.map((c) => (
-                    <tr key={c.id}>
-                      <td>{c.id}</td>
-                      <td>{getCategoryLabel(c.category)}</td>
-                      <td>
+              ) : (
+                filteredComplaints.map((c) => (
+                  <tr key={c.id} className="hover:bg-red-50 transition-colors duration-200">
+                    <td className="px-3 sm:px-4 py-3 sm:py-4 text-xs sm:text-sm text-gray-800">{c.id}</td>
+                    <td className="px-3 sm:px-4 py-3 sm:py-4 text-xs sm:text-sm text-gray-800">{getCategoryLabel(c.category)}</td>
+                    <td className="px-3 sm:px-4 py-3 sm:py-4">
                       <span 
-                        className={`status-badge ${getStatusClass(c.status)}`}
-                        onClick={() => openModalForStatusChange(c)}  // Open modal to change status
-                        style={{ cursor: "pointer" }}  // Show pointer cursor on hover
+                        className={`inline-block px-3 py-1.5 rounded-full text-xs font-semibold capitalize cursor-pointer ${getStatusClass(c.status)}`}
+                        onClick={() => openModalForStatusChange(c)}
                       >
                         {c.status || "Pending"}
                       </span>
                     </td>
-                      <td>{formatDateTime(c.submissionDate)}</td>
-                      <td className="actions-cell">
+                    <td className="px-3 sm:px-4 py-3 sm:py-4 text-xs sm:text-sm text-gray-800 hidden sm:table-cell">{formatDateTime(c.submissionDate)}</td>
+                    <td className="px-3 sm:px-4 py-3 sm:py-4">
+                      <div className="flex flex-col sm:flex-row gap-2">
                         <button
-                          className="btn-view"
+                          className="bg-[#1094d0] text-white border-none px-3 py-1.5 rounded-full cursor-pointer font-medium text-xs transition-all duration-300 hover:bg-[#A84700] hover:-translate-y-0.5 hover:shadow-lg"
                           onClick={() => openModal(c, "manage")}
                           title="View the full complaint details"
                         >
                           View
                         </button>
                         <button
-                          className="btn-note"
+                          className="bg-[#65b95e] text-white border-none px-3 py-1.5 rounded-full cursor-pointer font-medium text-xs transition-all duration-300 hover:bg-[#A84700] hover:-translate-y-0.5 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:transform-none"
                           onClick={() => openNoteModal(c)}
                           disabled={!currentUser}
                           title={
@@ -663,228 +667,238 @@ const getStatusClass = (status) => {
                         >
                           {getSharedNote(c) ? "Update Note" : "Add Note"}
                         </button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-          {showModal && selectedComplaint && (
-            <div className="modal-overlay" onClick={closeModal}>
-              <div className="modal-container" onClick={(e) => e.stopPropagation()}>
-                <div className="modal-header">
-                  <div>
-                    <h3>Complaint #{selectedComplaint.id}</h3>
-                    <p>
-                      {(selectedComplaint.college || "No college specified") +
-                        " - " +
-                        getCategoryLabel(selectedComplaint.category)}
-                    </p>
-                  </div>
-                  <button className="btn-close" onClick={closeModal}>
-                    <i className="fas fa-xmark"></i>
-                  </button>
-                </div>
+      {/* Main Modal */}
+      {showModal && selectedComplaint && (
+        <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-[1000] p-4 sm:p-5 backdrop-blur-sm" onClick={closeModal}>
+          <div className="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl animate-[modalSlideIn_0.3s_ease]" onClick={(e) => e.stopPropagation()}>
+            <div className="px-6 sm:px-8 py-5 sm:py-6 border-b-2 border-gray-200 flex justify-between items-start bg-gradient-to-r from-[#800000] to-[#600000] text-white rounded-t-2xl">
+              <div>
+                <h3 className="text-lg sm:text-xl font-bold text-white m-0">Complaint #{selectedComplaint.id}</h3>
+                <p className="text-xs opacity-90 mt-1">
+                  {getCategoryLabel(selectedComplaint.category)}
+                </p>
+              </div>
+              <button className="text-white w-8 h-8 cursor-pointer flex items-center justify-center transition-all duration-300 hover:bg-white/30 hover:rotate-90 hover:rounded-full border-none bg-transparent" onClick={closeModal}>
+                <i className="fas fa-xmark text-xl"></i>
+              </button>
+            </div>
 
-                <div className="modal-tabs">
-                  {visibleTabs.map((tabKey) => (
-                    <button
-                      key={tabKey}
-                      className={`tab-btn ${activeTab === tabKey ? "active" : ""}`}
-                      onClick={() => setActiveTab(tabKey)}
-                    >
-                      {TAB_LABELS[tabKey]}
-                    </button>
-                  ))}
-                  {modalMode === "view" && (
-                    <button className="btn-secondary manage-switch" onClick={() => switchToManageMode("details")}>
-                      Manage Complaint
-                    </button>
-                  )}
-                </div>
+            <div className="flex bg-gray-50 p-0 border-b-2 border-gray-300 overflow-x-auto">
+              {visibleTabs.map((tabKey) => (
+                <button
+                  key={tabKey}
+                  className={`flex-1 min-w-[100px] px-4 sm:px-5 py-3 sm:py-4 bg-transparent border-none cursor-pointer font-medium text-xs sm:text-sm transition-all duration-300 border-b-[3px] ${
+                    activeTab === tabKey 
+                      ? 'bg-white text-[#800000] border-[#800000] font-semibold' 
+                      : 'text-gray-600 border-transparent hover:bg-gray-200 hover:text-[#800000]'
+                  }`}
+                  onClick={() => setActiveTab(tabKey)}
+                >
+                  {TAB_LABELS[tabKey]}
+                </button>
+              ))}
+              {modalMode === "view" && (
+                <button className="bg-[#800000] text-white border-none px-4 py-2.5 rounded-lg cursor-pointer font-normal text-sm transition-all duration-200 mt-4" onClick={() => switchToManageMode("details")}>
+                  Manage Complaint
+                </button>
+              )}
+            </div>
 
-                <div className="modal-body">
-                  {visibleTabs.includes("details") && activeTab === "details" && (
-                    <div className="tab-content">{renderComplaintDetails()}</div>
-                  )}
+            <div className="px-6 sm:px-8 py-5 sm:pt-4 overflow-y-auto flex-1">
+              {visibleTabs.includes("details") && activeTab === "details" && (
+                <div>{renderComplaintDetails()}</div>
+              )}
 
-                  {visibleTabs.includes("feedback") && activeTab === "feedback" && (
-                    <div className="tab-content">
-                      <h4>Feedback History</h4>
-                      {!selectedComplaint.feedbackHistory ||
-                      selectedComplaint.feedbackHistory.length === 0 ? (
-                        <p className="empty-state">No feedback shared yet.</p>
-                      ) : (
-                        <div className="feedback-history">
-                          {selectedComplaint.feedbackHistory.map((item, index) => (
-                            <div className="feedback-item" key={`${item.date || index}-${index}`}>
-                              <div className="feedback-header">
-                                <strong>Administrator</strong>
-                                <span className="feedback-date">
-                                  {item.date ? formatDateTime(item.date) : "Just now"}
+              {visibleTabs.includes("feedback") && activeTab === "feedback" && (
+                <div>
+                  <h4 className="text-[#800000] text-base sm:text-lg font-semibold m-0 mb-5 pb-2.5 border-b-2 border-gray-200">Feedback History</h4>
+                  {!selectedComplaint.feedbackHistory || selectedComplaint.feedbackHistory.length === 0 ? (
+                    <p className="text-center py-10 text-gray-400 italic bg-gray-50 rounded-lg">No feedback shared yet.</p>
+                  ) : (
+                    <div className="mb-6">
+                      {selectedComplaint.feedbackHistory.map((item, index) => (
+                        <div className="bg-gray-50 p-4 rounded-lg mb-3 border-l-4 border-[#800000]" key={`${item.date || index}-${index}`}>
+                          <div className="flex justify-between items-center mb-2.5">
+                            <strong className="text-[#800000] text-sm">Administrator</strong>
+                            <span className="text-gray-400 text-xs">
+                              {item.date ? formatDateTime(item.date) : "Just now"}
+                            </span>
+                          </div>
+                          <p className="text-gray-800 text-sm m-0 leading-relaxed">{item.feedback}</p>
+                          {item.files && item.files.length > 0 && (
+                            <div className="flex gap-2 flex-wrap mt-2.5">
+                              {item.files.map((file, fileIndex) => (
+                                <span className="inline-block px-2.5 py-1 bg-white border border-gray-300 rounded text-xs text-gray-600" key={`${file}-${fileIndex}`}>
+                                  {file.name || file}
                                 </span>
-                              </div>
-                              <p>{item.feedback}</p>
-                              {item.files && item.files.length > 0 && (
-                                <div className="feedback-files">
-                                  {item.files.map((file, fileIndex) => (
-                                    <span className="file-tag" key={`${file}-${fileIndex}`}>
-                                      {file.name || file}
-                                    </span>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
-                      <div className="feedback-form">
-                        <h4>Send New Feedback</h4>
-                        <textarea
-                          rows="4"
-                          placeholder="Write your feedback to the student..."
-                          value={feedback}
-                          onChange={(e) => setFeedback(e.target.value)}
-                        ></textarea>
-
-                        <div className="file-upload-section">
-                          <label className="file-upload-label">
-                            <input
-                              type="file"
-                              multiple
-                              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                              onChange={handleFeedbackFileChange}
-                            />
-                            Attach Files
-                          </label>
-                          {feedbackFiles.length > 0 && (
-                            <div className="selected-files">
-                              {feedbackFiles.map((file, index) => (
-                                <div className="file-chip" key={`${file.name || "file"}-${index}`}>
-                                  <span>{file.name || "Attachment"}</span>
-                                  <button type="button" onClick={() => handleRemoveFeedbackFile(index)}><i class="fas fa-times"></i></button>
-                                </div>
                               ))}
                             </div>
                           )}
                         </div>
-
-                        <button className="btn-primary" onClick={handleSendFeedback}>
-                          Send Feedback
-                        </button>
-                      </div>
+                      ))}
                     </div>
                   )}
 
-                  {visibleTabs.includes("notes") && activeTab === "notes" && (
-                    <div className="tab-content">
-                      <h4>Shared Notes</h4>
-                      {!selectedComplaint.adminNotes || selectedComplaint.adminNotes.length === 0 ? (
-                        <p className="empty-state">No notes have been added.</p>
-                      ) : (
-                        <div className="notes-history">
-                          {selectedComplaint.adminNotes.map((note, index) => (
-                            <div className="note-card" key={`${note.adminId || "note"}-${index}`}>
-                              <div className="note-card-header">
-                                <span className="note-author">
-                                  {note.adminName || "Unknown"} -{" "}
-                                  {note.adminRole ? note.adminRole.toUpperCase() : "STAFF"}
-                                </span>
-                                <span className="note-timestamp">
-                                  {formatNoteTimestamp(note.updatedAt || note.createdAt)}
-                                </span>
-                              </div>
-                              <p className="note-text">{note.note}</p>
+                  <div className="bg-white p-5 sm:p-6 rounded-xl border-2 border-gray-200 mt-5">
+                    <h4 className="text-[#800000] text-base sm:text-lg font-semibold m-0 mb-5 pb-2.5 border-b-2 border-gray-200">Send New Feedback</h4>
+                    <textarea
+                      rows="4"
+                      placeholder="Write your feedback to the student..."
+                      value={feedback}
+                      onChange={(e) => setFeedback(e.target.value)}
+                      className="w-full px-4 sm:px-5 py-3 sm:py-4 border border-gray-400 rounded-xl text-sm sm:text-base text-gray-800 resize-vertical transition-all duration-300 shadow-sm mb-4 focus:outline-none focus:border-[#800000] focus:ring-4 focus:ring-[#800000]/15"
+                    ></textarea>
+
+                    <div className="my-5">
+                      <label className="inline-block px-5 py-2.5 bg-red-50 text-[#800000] border-2 border-dashed border-[#800000] rounded-lg cursor-pointer font-medium transition-all duration-300 hover:bg-[#800000] hover:text-white">
+                        <input
+                          type="file"
+                          multiple
+                          accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                          onChange={handleFeedbackFileChange}
+                          className="hidden"
+                        />
+                        Attach Files
+                      </label>
+                      {feedbackFiles.length > 0 && (
+                        <div className="mt-4 flex flex-wrap gap-2.5">
+                          {feedbackFiles.map((file, index) => (
+                            <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-xs" key={`${file.name || "file"}-${index}`}>
+                              <span>{file.name || "Attachment"}</span>
+                              <button type="button" onClick={() => handleRemoveFeedbackFile(index)} className="bg-[#800000] text-white border-none rounded-full w-5 h-5 cursor-pointer text-sm leading-none transition-all duration-200 hover:bg-[#600000] hover:scale-110">
+                                <i className="fas fa-times"></i>
+                              </button>
                             </div>
                           ))}
                         </div>
                       )}
-                      <button className="btn-secondary" onClick={() => openNoteModal(selectedComplaint)}>
-                        {getSharedNote(selectedComplaint) ? "Update Note" : "Add Note"}
-                      </button>
                     </div>
-                  )}
 
-                  {visibleTabs.includes("status") && activeTab === "status" && (
-                    <div className="tab-content">
-                      <h4>Status Management</h4>
-
-                      <div className="current-status-display">
-                        <p>
-                          <strong>Current Status:</strong>
-                        </p>
-                        <span className={`status-badge ${getStatusClass(selectedComplaint.status)}`}>
-                          {selectedComplaint.status || "Pending"}
-                        </span>
-                      </div>
-
-                      <div className="status-form">
-                        <div className="form-group">
-                          <label>New Status:</label>
-                          <select value={newStatus} onChange={(e) => setNewStatus(e.target.value)}>
-                            <option value="pending">Pending</option>
-                            <option value="in-progress">In Progress</option>
-                            <option value="resolved">Resolved</option>
-                            <option value="closed">Closed</option>
-                          </select>
-                        </div>
-                        <button className="btn-primary" onClick={() => handleUpdateStatus(newStatus)}>
-                          Update Status
-                        </button>
-                      </div>
-                    </div>
-                  )}
+                    <button className="bg-[#800000] text-white border-none px-4 sm:px-5 py-2.5 rounded-lg cursor-pointer font-normal text-sm transition-all duration-200 mt-4 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-[#800000]/30 active:translate-y-0" onClick={handleSendFeedback}>
+                      Send Feedback
+                    </button>
+                  </div>
                 </div>
-              </div>
-            </div>
-          )}
+              )}
 
-        {noteModalComplaint && (
-          <div className="modal-overlay" onClick={closeNoteModal}>
-            <div className="modal-container note-modal" onClick={(e) => e.stopPropagation()}>
-              <div className="modal-header">
-                <h3>
-                  {getSharedNote(noteModalComplaint) ? "Update" : "Add"} Note - {noteModalComplaint.id}
-                </h3>
-                <button className="btn-close" onClick={closeNoteModal}>
-                  ×
-                </button>
-              </div>
-              <div className="modal-body">
-                <textarea
-                  className="note-textarea"
-                  placeholder="Write a quick update for this complaint..."
-                  value={noteInput}
-                  onChange={(e) => setNoteInput(e.target.value)}
-                />
-                {noteError && <p className="error-text">{noteError}</p>}
-              </div>
-              <div className="modal-footer">
-                <button className="btn-secondary" onClick={closeNoteModal} disabled={isSavingNote}>
-                  Cancel
-                </button>
-                <button
-                  className="btn-primary"
-                  onClick={handleSaveAdminNote}
-                  disabled={isSavingNote}
-                >
-                  {isSavingNote
-                    ? "Saving..."
-                    : getSharedNote(noteModalComplaint)
-                    ? "Update Note"
-                    : "Add Note"}
-                </button>
-              </div>
+              {visibleTabs.includes("notes") && activeTab === "notes" && (
+                <div>
+                  <h4 className="text-[#800000] text-base sm:text-lg font-semibold m-0 mb-5 pb-2.5 border-b-2 border-gray-200">Shared Notes</h4>
+                  {!selectedComplaint.adminNotes || selectedComplaint.adminNotes.length === 0 ? (
+                    <p className="text-center py-10 text-gray-400 italic bg-gray-50 rounded-lg">No notes have been added.</p>
+                  ) : (
+                    <div className="flex flex-col gap-3">
+                      {selectedComplaint.adminNotes.map((note, index) => (
+                        <div className="bg-gray-50 border border-gray-300 rounded-xl px-3.5 py-3" key={`${note.adminId || "note"}-${index}`}>
+                          <div className="flex justify-between items-center text-xs text-gray-600 mb-1.5">
+                            <span className="font-medium">
+                              {note.adminName || "Unknown"} -{" "}
+                              {note.adminRole ? note.adminRole.toUpperCase() : "STAFF"}
+                            </span>
+                            <span className="text-gray-500">
+                              {formatNoteTimestamp(note.updatedAt || note.createdAt)}
+                            </span>
+                          </div>
+                          <p className="m-0 text-sm text-gray-800">{note.note}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <button className="bg-[#800000] text-white border-none px-4 sm:px-5 py-2.5 rounded-lg cursor-pointer font-normal text-sm transition-all duration-200 mt-4 hover:bg-gray-400" onClick={() => openNoteModal(selectedComplaint)}>
+                    {getSharedNote(selectedComplaint) ? "Update Note" : "Add Note"}
+                  </button>
+                </div>
+              )}
+
+              {visibleTabs.includes("status") && activeTab === "status" && (
+                <div>
+                  <h4 className="text-[#800000] text-base sm:text-lg font-semibold m-0 mb-5 pb-2.5 border-b-2 border-gray-200">Status Management</h4>
+
+                  <div className="bg-red-50 p-5 rounded-lg mb-5 text-center">
+                    <p className="m-0 mb-2.5 text-gray-600 font-medium">
+                      <strong>Current Status:</strong>
+                    </p>
+                    <span className={`inline-block px-3.5 py-1.5 rounded-full text-xs font-semibold capitalize ${getStatusClass(selectedComplaint.status)}`}>
+                      {selectedComplaint.status || "Pending"}
+                    </span>
+                  </div>
+
+                  <div className="bg-white p-5 sm:p-6 rounded-xl border-2 border-gray-200 mt-5">
+                    <div className="mb-5">
+                      <label className="block font-semibold text-[#800000] mb-2 text-sm">New Status:</label>
+                      <select value={newStatus} onChange={(e) => setNewStatus(e.target.value)} className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg text-sm transition-all duration-300 focus:outline-none focus:border-[#800000] focus:ring-4 focus:ring-[#800000]/10">
+                        <option value="pending">Pending</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="resolved">Resolved</option>
+                        <option value="closed">Closed</option>
+                      </select>
+                    </div>
+                    <button className="bg-[#800000] text-white border-none px-4 sm:px-5 py-2.5 rounded-lg cursor-pointer font-normal text-sm transition-all duration-200 mt-4 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-[#800000]/30 active:translate-y-0" onClick={() => handleUpdateStatus(newStatus)}>
+                      Update Status
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
-        )}
         </div>
+      )}
+
+      {/* Note Modal */}
+      {noteModalComplaint && (
+        <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-[1000] p-4 sm:p-5 backdrop-blur-sm" onClick={closeNoteModal}>
+          <div className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] flex flex-col shadow-2xl animate-[modalSlideIn_0.3s_ease]" onClick={(e) => e.stopPropagation()}>
+            <div className="px-6 sm:px-8 py-5 sm:py-6 border-b-2 border-gray-200 flex justify-between items-start bg-gradient-to-r from-[#800000] to-[#600000] text-white rounded-t-2xl">
+              <h3 className="text-lg sm:text-xl font-bold text-white m-0">
+                {getSharedNote(noteModalComplaint) ? "Update" : "Add"} Note - {noteModalComplaint.id}
+              </h3>
+              <button className="text-white w-8 h-8 cursor-pointer flex items-center justify-center transition-all duration-300 hover:bg-white/30 hover:rotate-90 hover:rounded-full border-none bg-transparent text-2xl leading-none" onClick={closeNoteModal}>
+                ×
+              </button>
+            </div>
+            <div className="px-6 sm:px-8 py-5 sm:pt-4 overflow-y-auto flex-1">
+              <textarea
+                className="w-full min-h-[140px] border border-gray-400 rounded-xl px-3.5 py-3 text-sm resize-vertical transition-all duration-200 focus:border-[#800000] focus:ring-4 focus:ring-[#800000]/12 focus:outline-none"
+                placeholder="Write a quick update for this complaint..."
+                value={noteInput}
+                onChange={(e) => setNoteInput(e.target.value)}
+              />
+              {noteError && <p className="text-red-700 text-xs mt-2">{noteError}</p>}
+            </div>
+            <div className="flex justify-end gap-3 px-6 sm:px-8 py-5 sm:pb-8 border-t border-gray-200">
+              <button className="bg-[#800000] text-white border-none px-4 sm:px-5 py-2.5 rounded-lg cursor-pointer font-normal text-sm transition-all duration-200 hover:bg-gray-400 disabled:opacity-70 disabled:cursor-not-allowed" onClick={closeNoteModal} disabled={isSavingNote}>
+                Cancel
+              </button>
+              <button
+                className="bg-[#800000] text-white border-none px-4 sm:px-5 py-2.5 rounded-lg cursor-pointer font-normal text-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-[#800000]/30 active:translate-y-0 disabled:opacity-70 disabled:cursor-not-allowed"
+                onClick={handleSaveAdminNote}
+                disabled={isSavingNote}
+              >
+                {isSavingNote
+                  ? "Saving..."
+                  : getSharedNote(noteModalComplaint)
+                  ? "Update Note"
+                  : "Add Note"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
-  );
-};
+    </main>
+  </div>
+);
+}
 
 export default AdminMonitorComplaints;
 
