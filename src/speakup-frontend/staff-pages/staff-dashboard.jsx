@@ -70,6 +70,7 @@ const StaffDashboard = () => {
           const data = doc.data() || {};
           const assignedRole = (data.assignedRole || '').toLowerCase().trim();
           const assignedTo = (data.assignedTo || '').toLowerCase().trim();
+          
 
           if (staffRole) {
             return assignedRole === staffRole && assignedTo === normalizedEmail;
@@ -192,7 +193,11 @@ const StaffDashboard = () => {
         )}
 
         <div className="block w-full min-w-0">
-          <UrgentComplaintsWidget />
+          <UrgentComplaintsWidget
+            staffRole={staffRole}
+            staffEmail={staffEmail}
+          />
+
         </div>
       </main>
     </div>
