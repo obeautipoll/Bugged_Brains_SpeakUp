@@ -2,7 +2,7 @@ import { loadLexicons } from "./loadLexicons.js";
 
 const urgencyKeywords = [
   // English
-  "urgent", "asap", "immediately", "now", "emergency", "danger",
+  "urgent", "asap", "immediately", "emergency", "danger",
   "help", "unsafe", "harass", "threat", "violence", "kill", "hurry", "extremely",
 
   // Cebuano
